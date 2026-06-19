@@ -1,13 +1,8 @@
 # Anime Meta Fix
-Automated metadata correction for anime collections.
 
-## Features
-* Detects metadata errors
-* Corrects metadata errors
-* Reorders metadata for consistency
-* Integrates with Jellyfin media server
+A command-line tool to correct anime metadata files.
 
-## Usage
-1. Install the package using `pip install .`
-2. Run the tests using `pytest`
-3. Use the `anime_meta_fix` module to correct and reorder metadata
+## Getting Started
+
+1. Install the tool using pip: `pip install .`
+2. Run the tool using the following command: `python -m anime_meta_fix --path /path/to/media/server`

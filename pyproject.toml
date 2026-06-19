@@ -5,7 +5,7 @@ build-backend = "poetry.masonry.api"
 [tool.poetry]
 name = "anime-meta-fix"
 version = "1.0.0"
-description = "Automated metadata correction for anime collections"
+description = "Anime Meta Fix"
 
 [tool.poetry.dependencies]
 python = "^3.8"

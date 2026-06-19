@@ -1,6 +1,7 @@
+import argparse
 import json
+import os
 from dataclasses import dataclass
-from typing import List
 
 @dataclass
 class AnimeMetadata:
@@ -8,34 +9,31 @@ class AnimeMetadata:
     genre: str
     episodes: int
 
-def detect_metadata_errors(metadata: List[AnimeMetadata]) -> List[AnimeMetadata]:
-    errors = []
-    for meta in metadata:
-        if not meta.title or not meta.genre or meta.episodes <= 0:
-            errors.append(meta)
-    return errors
+def load_metadata(file_path):
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+        return AnimeMetadata(data['title'], data['genre'], data['episodes'])
 
-def correct_metadata_errors(metadata: List[AnimeMetadata]) -> List[AnimeMetadata]:
-    corrected = []
-    for meta in metadata:
-        if not meta.title:
-            meta.title = "Unknown"
-        if not meta.genre:
-            meta.genre = "Unknown"
-        if meta.episodes <= 0:
-            meta.episodes = 1
-        corrected.append(meta)
-    return corrected
+def correct_metadata(metadata):
+    # Simple correction logic: capitalize title and genre
+    return AnimeMetadata(metadata.title.capitalize(), metadata.genre.capitalize(), metadata.episodes)
 
-def reorder_metadata(metadata: List[AnimeMetadata]) -> List[AnimeMetadata]:
-    return sorted(metadata, key=lambda x: x.title)
+def save_metadata(file_path, metadata):
+    with open(file_path, 'w') as file:
+        json.dump({'title': metadata.title, 'genre': metadata.genre, 'episodes': metadata.episodes}, file)
 
-def integrate_with_jellyfin(metadata: List[AnimeMetadata]) -> str:
-    jellyfin_data = {"anime": []}
-    for meta in metadata:
-        jellyfin_data["anime"].append({
-            "title": meta.title,
-            "genre": meta.genre,
-            "episodes": meta.episodes
-        })
-    return json.dumps(jellyfin_data)
+def main():
+    parser = argparse.ArgumentParser(description='Anime Meta Fix')
+    parser.add_argument('--path', help='Media server directory path')
+    args = parser.parse_args()
+
+    for root, dirs, files in os.walk(args.path):
+        for file in files:
+            if file.endswith('.json'):
+                file_path = os.path.join(root, file)
+                metadata = load_metadata(file_path)
+                corrected_metadata = correct_metadata(metadata)
+                save_metadata(file_path, corrected_metadata)
+
+if __name__ == '__main__':
+    main()
