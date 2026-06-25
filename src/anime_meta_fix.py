@@ -1,39 +1,37 @@
-import argparse
 import json
-import os
 from dataclasses import dataclass
+from typing import List, Dict
 
 @dataclass
 class AnimeMetadata:
     title: str
     genre: str
-    episodes: int
+    description: str
 
-def load_metadata(file_path):
-    with open(file_path, 'r') as file:
-        data = json.load(file)
-        return AnimeMetadata(data['title'], data['genre'], data['episodes'])
+class AnimeMetaFix:
+    def __init__(self, metadata: List[AnimeMetadata]):
+        self.metadata = metadata
 
-def correct_metadata(metadata):
-    # Simple correction logic: capitalize title and genre
-    return AnimeMetadata(metadata.title.capitalize(), metadata.genre.capitalize(), metadata.episodes)
+    def detect_incorrect_metadata(self) -> List[AnimeMetadata]:
+        incorrect_metadata = []
+        for metadata in self.metadata:
+            if not metadata.title or not metadata.genre or not metadata.description:
+                incorrect_metadata.append(metadata)
+        return incorrect_metadata
 
-def save_metadata(file_path, metadata):
-    with open(file_path, 'w') as file:
-        json.dump({'title': metadata.title, 'genre': metadata.genre, 'episodes': metadata.episodes}, file)
+    def suggest_corrections(self, incorrect_metadata: List[AnimeMetadata]) -> List[AnimeMetadata]:
+        corrections = []
+        for metadata in incorrect_metadata:
+            corrected_metadata = AnimeMetadata(
+                title=metadata.title if metadata.title else "Unknown Title",
+                genre=metadata.genre if metadata.genre else "Unknown Genre",
+                description=metadata.description if metadata.description else "Unknown Description"
+            )
+            corrections.append((metadata, corrected_metadata))
+        return corrections
 
-def main():
-    parser = argparse.ArgumentParser(description='Anime Meta Fix')
-    parser.add_argument('--path', help='Media server directory path')
-    args = parser.parse_args()
-
-    for root, dirs, files in os.walk(args.path):
-        for file in files:
-            if file.endswith('.json'):
-                file_path = os.path.join(root, file)
-                metadata = load_metadata(file_path)
-                corrected_metadata = correct_metadata(metadata)
-                save_metadata(file_path, corrected_metadata)
-
-if __name__ == '__main__':
-    main()
+    def apply_corrections(self, corrections: List[tuple]) -> List[AnimeMetadata]:
+        corrected_metadata = []
+        for metadata, corrected_metadata_item in corrections:
+            corrected_metadata.append(corrected_metadata_item)
+        return corrected_metadata

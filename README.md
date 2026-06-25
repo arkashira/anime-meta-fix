@@ -1,8 +1,6 @@
 # Anime Meta Fix
+Anime Meta Fix is a tool for correcting anime metadata.
 
-A command-line tool to correct anime metadata files.
-
-## Getting Started
-
-1. Install the tool using pip: `pip install .`
-2. Run the tool using the following command: `python -m anime_meta_fix --path /path/to/media/server`
+## Usage
+1. Install the tool using `poetry install`.
+2. Run the tool using `python -m anime_meta_fix`.
