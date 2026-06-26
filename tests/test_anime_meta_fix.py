@@ -1,43 +1,36 @@
-from anime_meta_fix import AnimeMetadata, AnimeMetaFix
-import pytest
+from anime_meta_fix import AnimeMetaFix, AnimeEpisode
 
-@pytest.fixture
-def metadata():
-    return [
-        AnimeMetadata("Title 1", "Genre 1", "Description 1"),
-        AnimeMetadata("", "Genre 2", "Description 2"),
-        AnimeMetadata("Title 3", "", "Description 3"),
-        AnimeMetadata("Title 4", "Genre 4", "")
-    ]
+def test_authenticate_valid_api_key():
+    anime_meta_fix = AnimeMetaFix("valid_api_key")
+    assert anime_meta_fix.authenticate() == True
 
-def test_detect_incorrect_metadata(metadata):
-    anime_meta_fix = AnimeMetaFix(metadata)
-    incorrect_metadata = anime_meta_fix.detect_incorrect_metadata()
-    assert len(incorrect_metadata) == 3
+def test_authenticate_invalid_api_key():
+    anime_meta_fix = AnimeMetaFix("invalid_api_key")
+    assert anime_meta_fix.authenticate() == False
 
-def test_suggest_corrections(metadata):
-    anime_meta_fix = AnimeMetaFix(metadata)
-    incorrect_metadata = anime_meta_fix.detect_incorrect_metadata()
-    corrections = anime_meta_fix.suggest_corrections(incorrect_metadata)
-    assert len(corrections) == 3
+def test_retrieve_metadata_authenticated():
+    anime_meta_fix = AnimeMetaFix("valid_api_key")
+    metadata = anime_meta_fix.retrieve_metadata()
+    assert len(metadata) == 2
+    assert isinstance(metadata[0], AnimeEpisode)
 
-def test_apply_corrections(metadata):
-    anime_meta_fix = AnimeMetaFix(metadata)
-    incorrect_metadata = anime_meta_fix.detect_incorrect_metadata()
-    corrections = anime_meta_fix.suggest_corrections(incorrect_metadata)
-    corrected_metadata = anime_meta_fix.apply_corrections(corrections)
-    assert len(corrected_metadata) == 3
+def test_retrieve_metadata_unauthenticated():
+    anime_meta_fix = AnimeMetaFix("invalid_api_key")
+    metadata = anime_meta_fix.retrieve_metadata()
+    assert len(metadata) == 0
 
-def test_accuracy():
+def test_store_in_cache():
+    anime_meta_fix = AnimeMetaFix("valid_api_key")
     metadata = [
-        AnimeMetadata("Title 1", "Genre 1", "Description 1"),
-        AnimeMetadata("", "Genre 2", "Description 2"),
-        AnimeMetadata("Title 3", "", "Description 3"),
-        AnimeMetadata("Title 4", "Genre 4", "")
+        AnimeEpisode("Anime 1", 1, 1, "/path/to/anime1/episode1"),
+        AnimeEpisode("Anime 2", 2, 1, "/path/to/anime2/episode2"),
     ]
-    anime_meta_fix = AnimeMetaFix(metadata)
-    incorrect_metadata = anime_meta_fix.detect_incorrect_metadata()
-    corrections = anime_meta_fix.suggest_corrections(incorrect_metadata)
-    corrected_metadata = anime_meta_fix.apply_corrections(corrections)
-    assert len(incorrect_metadata) / len(metadata) >= 0.5
-    assert len(corrections) / len(incorrect_metadata) == 1
+    anime_meta_fix.store_in_cache(metadata)
+    cached_metadata = anime_meta_fix.get_cached_metadata()
+    assert len(cached_metadata) == 2
+    assert isinstance(cached_metadata[0], AnimeEpisode)
+
+def test_get_cached_metadata_empty_cache():
+    anime_meta_fix = AnimeMetaFix("valid_api_key")
+    cached_metadata = anime_meta_fix.get_cached_metadata()
+    assert cached_metadata == []
